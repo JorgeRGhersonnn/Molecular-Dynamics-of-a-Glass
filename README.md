@@ -1,4 +1,4 @@
-# MDGlass
+# Molecular Dynamics of a Glass
 
 ## Equations of Motion
 
