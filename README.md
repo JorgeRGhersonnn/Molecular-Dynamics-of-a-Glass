@@ -31,11 +31,11 @@ $$U_{\text{tot}} = \sum_{i<j} U_{ij} = \sum_{i<j} 4\epsilon_{\alpha\beta}\left[\
 
 Here, the summation $i<j$ ensures that each pair interaction is counted only once. The force between particles $i$ and $j$ is derived from $U_{ij}$ by differentiation:
 
-$$\mathbf{F}_{ij} = -\frac{d U_{ij}}{d r_{ij}} \hat{\mathbf{r}}_{ij}$$
+$$\mathbf{F}_{ij} = -\frac{d U_{ij}}{d r_{ij}}\hat{\mathbf{r}}_{ij}$$
 
-where $ \hat{\mathbf{r}}_{ij} = \frac{\mathbf{r}_i - \mathbf{r}_j}{r_{ij}} $. Differentiating Equation \eqref{eq:KA} with respect to $r_{ij}$ gives:
+where $\hat{\mathbf{r}}_{ij} = \frac{\mathbf{r}_i-\mathbf{r}_j}{r_{ij}}$. Differentiating Equation \eqref{eq:KA} with respect to $r_{ij}$ gives:
 
-$$\frac{d U_{ij}}{d r_{ij}} = 4\epsilon_{\alpha\beta} \left[-12 \left(\frac{\sigma_{\alpha\beta}}{r_{ij}}\right)^{12} \frac{1}{r_{ij}} + 6 \left(\frac{\sigma_{\alpha\beta}}{r_{ij}}\right)^{6} \frac{1}{r_{ij}}\right]$$
+$$\frac{d U_{ij}}{d r_{ij}} = 4\epsilon_{\alpha\beta}\left[-12 \left(\frac{\sigma_{\alpha\beta}}{r_{ij}}\right)^{12} \frac{1}{r_{ij}} + 6 \left(\frac{\sigma_{\alpha\beta}}{r_{ij}}\right)^{6} \frac{1}{r_{ij}}\right]$$
 
 Thus,
 
