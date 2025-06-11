@@ -27,7 +27,7 @@ with the understanding that in some implementations, an additional Morse potenti
 ## Particle Acceleration
 The total potential energy of the system is obtained by summing over all unique pairwise interactions:
 
-$$U_{\text{tot}} = \sum_{i<j} U_{ij} = \sum_{i<j} 4\epsilon_{\alpha\beta} \left[ \left(\frac{\sigma_{\alpha\beta}}{r_{ij}}\right)^{12} - \left(\frac{\sigma_{\alpha\beta}}{r_{ij}}\right)^{6} \right]$$
+$$U_{\text{tot}} = \sum_{i<j} U_{ij} = \sum_{i<j} 4\epsilon_{\alpha\beta}\left[\left(\frac{\sigma_{\alpha\beta}}{r_{ij}}\right)^{12}-\left(\frac{\sigma_{\alpha\beta}}{r_{ij}}\right)^{6}\right]$$
 
 Here, the summation $i<j$ ensures that each pair interaction is counted only once. The force between particles $i$ and $j$ is derived from $U_{ij}$ by differentiation:
 
@@ -43,4 +43,4 @@ $$F_{ij} = 24 \epsilon_{\alpha\beta} \left[\frac{2\sigma_{\alpha\beta}^{12}}{r_{
 
 and the total force on particle $i$ is:
 
-$$\mathbf{F}_i = \sum_{j \neq i} \mathbf{F}_{ij} = \sum_{j \neq i} 24 \epsilon_{\alpha\beta} \left[\frac{2\sigma_{\alpha\beta}^{12}}{r_{ij}^{13}} - \frac{\sigma_{\alpha\beta}^{6}}{r_{ij}^{7}} \right] \hat{\mathbf{r}}_{ij}$$
+$$\mathbf{F}_i = \sum_{j \neq i} \mathbf{F}_{ij} = \sum_{j \neq i} 24 \epsilon_{\alpha\beta}\left[\frac{2\sigma_{\alpha\beta}^{12}}{r_{ij}^{13}} - \frac{\sigma_{\alpha\beta}^{6}}{r_{ij}^{7}}\right] \hat{\mathbf{r}}_{ij}$$
