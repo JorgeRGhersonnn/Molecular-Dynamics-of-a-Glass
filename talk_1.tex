@@ -1,0 +1,141 @@
+\documentclass{beamer}
+\usetheme{Boadilla} % Change theme if desired
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{multicol}
+
+\title{Evaluating Glass Forming Compounds via NVE Ensemble Molecular Dynamics Simulation}
+\subtitle{Background and Methodology for PHYS338 Final Project}
+\author{Jorge R. Gherson}
+\date{March 24, 2025}
+
+\begin{document}
+
+% Title slide
+\begin{frame}
+  \titlepage
+\end{frame}
+
+% Motivation slide
+\section{Motivation}
+\begin{frame}{Motivation and Project Goals}
+  \begin{itemize}
+    \item \textbf{Why study glass formers?} They exhibit complex, non-crystalline behavior and unique energy dynamics that are critical to understanding material properties.
+    \item \textbf{Role of MD:} Molecular Dynamics (MD) simulations allow us to explore microscopic structural and dynamic phenomena.
+    \item \textbf{Project Aim:} Use an NVE ensemble to preserve energy conservation while analyzing diffusion and structure in glass forming compounds.
+  \end{itemize}
+\end{frame}
+
+% Section 1: MD Formulation
+\section{MD Formulation}
+\begin{frame}{Molecular Dynamics Formulation}
+  \begin{itemize}
+    \item From Newton's second law:
+      \[
+      \mathbf{F}_i = m_i \frac{d^2 \mathbf{r}_i}{dt^2}.
+      \]
+    \item The force is obtained from the interatomic potential \(U(\mathbf{r})\):
+      \[
+      \mathbf{F}_i = -\nabla_i U(\mathbf{r}_i).
+      \]
+  \end{itemize}
+\end{frame}
+
+% Section 2: Interatomic Potentials
+\section{Interatomic Potentials}
+\begin{frame}{Lennard-Jones Potential}
+  \begin{itemize}
+    \item A simple yet widely used model for interatomic interactions:
+      \[
+      U(r_{ij}) = 4\epsilon \left[\left(\frac{\sigma}{r_{ij}}\right)^{12} - \left(\frac{\sigma}{r_{ij}}\right)^6\right].
+      \]
+    where:
+    \begin{itemize}
+      \item \(\epsilon\) is the depth of the potential well.
+      \item \(\sigma\) is the finite distance at which the inter-particle potential is zero.
+      \item \(r_{ij}\) is the distance between particles \(i\) and \(j\).
+      \item The equilibrium separation is at \(r_{ij}=2^{1/6}\sigma\).
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Kob-Andersen Model}
+    \begin{itemize}
+      \item An extension of the Lennard-Jones model tailored for binary mixtures.
+      \item For particle types \(\alpha,\beta \in \{A,B\}\) in an 80:20 A:B mixture:
+        \[
+        U_{ij} = U_{\alpha\beta}(r_{ij}) = 4\epsilon_{\alpha\beta}\left[\left(\frac{\sigma_{\alpha\beta}}{r_{ij}}\right)^{12} - \left(\frac{\sigma_{\alpha\beta}}{r_{ij}}\right)^6\right].
+        \]
+      \item This adjustment captures additional anharmonic effects relevant to glass formation.
+    \end{itemize}
+\end{frame}
+
+% Section 3: Simulation Method
+\section{Simulation Method}
+\begin{frame}{Velocity-Verlet Algorithm}
+  To update positions and velocities, we use the Velocity-Verlet algorithm:
+  \begin{align}
+    \mathbf{r}_i(t+\Delta t) &= \mathbf{r}_i(t) + \mathbf{v}_i(t)\Delta t + \frac{1}{2} \mathbf{a}_i(t)\Delta t^2, \label{eq:verlet1} \\
+    \mathbf{v}_i(t+\Delta t) &= \mathbf{v}_i(t) + \frac{1}{2}\left[\mathbf{a}_i(t) + \mathbf{a}_i(t+\Delta t)\right]\Delta t. \label{eq:verlet2}
+  \end{align}
+  \vspace{0.5em}
+  \begin{itemize}
+    \item \textbf{Benefits:} Time-reversible, stable, and energy conserving.
+    \item \textbf{Ensemble:} NVE ensures constant total energy during simulation.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Periodic Boundary Conditions}
+  \begin{multicols}{2}
+  \begin{itemize}
+    \item \textbf{Purpose:} Mimic an infinite system by wrapping particles into a simulation box.
+    \item \textbf{Minimum Image Convention:}
+      \[
+      r_{ij} = \min_{n \in \{-1,0,1\}^3} \left| \mathbf{r}_j - \mathbf{r}_i - \mathbf{L}\cdot\mathbf{n} \right|
+      \]
+    \item A cutoff radius \(r_{cut} \approx 2.5\sigma\) is applied to reduce computation.
+    \item To avoid discontinuities, define \(U^{\text{cut}}_{ij}\) at \(r_{cut}\): 
+    \vspace{0.2cm}
+    \begin{equation*}
+      U_{ij}^{\text{cut}} = 
+      \begin{cases}
+          U_{\alpha\beta}(r_{ij}) - U_{\alpha\beta}(r_{\alpha\beta}^{\text{cut}}) & r_{ij} < r_{\alpha\beta}^\text{cut} \\
+          0 & \text{otherwise}
+      \end{cases}
+    \end{equation*}
+  \end{itemize}
+  \columnbreak
+  \includegraphics[width=\linewidth]{./figures/fig1.png} % Placeholder: Insert schematic diagram here.
+  \end{multicols}
+\end{frame}
+
+% Section 4: Analysis Techniques
+\section{Analysis Techniques}
+\begin{frame}{Analysis Techniques}
+  \begin{itemize}
+    \item \textbf{Radial Distribution Function (RDF):} Measures local structural order and describes the probability of 
+    finding a particle at a distance \(r\) from another reference particle.
+      \[
+      g_{\alpha\alpha}(r) = \frac{V}{N_\alpha (N_\alpha-1)} \Bigg\langle \sum_{i=1}^{N_\alpha} \sum_{\substack{j=1 \\ j\neq i}}^{N_\alpha} \delta\Big(r-|\mathbf{r}_i-\mathbf{r}_j|\Big) \Bigg\rangle.
+      \] 
+    where the Dirac delta function \(\delta(r - |\bf{r}_i-\bf{r}_j|)\) ensures that only particles at a distance \(r\) contribute to the sum.
+    \item \textbf{Mean Square Displacement (MSD):} Quantifies diffusion by tracking particle displacement over time.
+  \end{itemize}
+\end{frame}
+
+% Section 5: Conclusions & Future Work
+\section{Conclusions \& Future Work}
+\begin{frame}{Conclusions \& Future Directions}
+  \begin{itemize}
+    \item MD simulations provide valuable microscopic insight into glass forming compounds.
+    \item The NVE ensemble effectively conserves energy, making it ideal for studying diffusion and energy dynamics.
+    \item \textbf{Future Directions:}
+      \begin{itemize}
+        \item Incorporate advanced analysis techniques to further probe dynamic properties. 
+        \item Explore different binary mixtures to understand their impact on glass formation.
+      \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\end{document}
