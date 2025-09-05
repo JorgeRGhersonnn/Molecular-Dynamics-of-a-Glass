@@ -1,0 +1,169 @@
+\documentclass{article}
+
+\usepackage{amsmath, amssymb, graphicx}
+\usepackage{physics}
+\usepackage{cite}
+\usepackage{natbib}
+
+\title{Background: Viscous Motion Via NVE Molecular Dynamics Simulation}
+\author{Jorge R. Gherson}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+Molecular dynamics (MD) simulations provide a powerful computational framework to study the thermodynamic and structural properties of 
+condensed matter systems, including supercooled liquids and metallic glasses. By numerically integrating Newton's equations of motion, 
+MD tracks the time evolution of atomic trajectories and thereby reveals microscopic mechanisms underlying phase transitions 
+\cite{allen1989computer, frenkel2002understanding}. 
+
+Among various computational models for glass formation, the  \textbf{Kob - Andersen (KA) model} has proven especially valuable for 
+investigating the dynamics of supercooled liquids. Designed as a binary Lennard-Jones (LJ) system, 
+the KA model suppresses crystallization through asymmetrical 
+interaction parameters, facilitating the formation of stable amorphous 
+states \cite{kob1994scaling, kob1995testing}.
+
+\section{Molecular Dynamics Formulation}
+\subsection{Newton's Equations of Motion}
+The motion of particles in a molecular system is governed by Newton’s second law, which states that the force acting on a particle is 
+equal to its mass multiplied by its acceleration. In mathematical terms, for a system of \(N\) particles, each having mass \(m_i\), 
+and position \(\mathbf{r}_i\), the equation takes the form:
+\begin{equation}
+    \mathbf{F}_i = m_i \frac{d^2 \mathbf{r}_i}{dt^2},
+\end{equation}
+
+The force \(\mathbf{F}_i\) is derived from the interatomic potential \(U(\mathbf{r})\) by taking its negative gradient:
+\begin{equation} \label{eq:force}
+    \mathbf{F}_i = -\mathbf{\nabla}_i \, U(\mathbf{r}_i).
+\end{equation}
+
+Thus, acceleration is given by:
+\begin{equation} \label{eq:acceleration}
+    \mathbf{a}_i = \frac{\mathbf{F}_i}{m_i} =\frac{1}{m_i}\begin{bmatrix}
+        \partial_{x_i}\sum_j U_{ij} \\
+        \partial_{y_i}\sum_j U_{ij} \\
+        \partial_{z_i}\sum_{j} U_{ij}
+    \end{bmatrix}
+\end{equation}
+
+\subsection{The Lennard-Jones Potential}
+A fundamental model for describing interatomic interactions is the Lennard-Jones potential, which captures the balance between 
+attractive and repulsive forces \cite{vollmayr2020introduction}. This potential is mathematically represented as:
+\begin{equation}\label{eq:LJ}
+    U(r) = 4\epsilon \left[ \left(\frac{\sigma}{r}\right)^{12} - \left(\frac{\sigma}{r}\right)^{6} \right],
+\end{equation}
+where \(\epsilon\) represents the depth of the potential well (i.e., the strength of the attractive interaction),
+\(\sigma\) is approximately the distance at which the interparticle potential becomes zero,
+the \(r^{-12}\) term models the steep repulsion due to overlapping electron orbitals (Pauli exclusion principle),
+and finally, the \(r^{-6}\) term captures the long-range van der Waals attractions.
+
+\subsection{Kob-Andersen Potential}
+The Kob-Andersen potential modifies the Lennard-Jones potential by allowing the parameters \(\epsilon\) and \(\sigma\) to depend on the particle types \(\alpha,\beta \in \{A,B\}\) of 
+particles \(i\) and \(j\) for an \(80:20 \, A:B\) mixture \cite{vollmayr2020introduction}. This adjustment can be used to capture additional anharmonic effects in atomic vibrations. The potential is given by:
+\begin{equation}\label{eq:KA}
+    U_{ij} = U_{\alpha\beta}(r_{ij}) = 4\epsilon_{\alpha\beta} \left[ \left(\frac{\sigma_{\alpha\beta}}{r_{ij}}\right)^{12} - \left(\frac{\sigma_{\alpha\beta}}{r_{ij}}\right)^{6} \right]
+\end{equation}
+with the understanding that in some implementations, an additional Morse potential term may be included to further capture anharmonic effects \cite{kob1994scaling}.
+Here, we use the same units as in \cite{vollmayr2020introduction} such that \(\sigma_{AA} = 1\) (length unit), \(\epsilon_{AA}=1\) (energy unit), \(m_A = 1\) (mass unit), and 
+\(k_B=1\) for the temperature unit \(\epsilon_{AA}/k_b\). The time unit is \(\sqrt{m_A \sigma^2_{AA}/\epsilon_{AA}}\).
+This results in our KA parameters being \(\sigma_{AA}=1,\, \epsilon_{AA}=1,\, \sigma_{AB}=0.8,\, \epsilon_{AB}=1.5,\, \sigma_{BB}=0.88,\, \epsilon_{BB}=0.5\), and 
+\(m_A = m_B = 1.0\) \cite{vollmayr2020introduction, kob1994scaling}.
+
+\subsection{Explicit Calculation of Total Potential Energy \(U_{\text{tot}}\)}
+The total potential energy of the system is obtained by summing over all unique pairwise interactions:
+\begin{equation} \label{eq:Utot}
+    U_{\text{tot}} = \sum_{i<j} U_{ij} = \sum_{i<j} 4\epsilon_{\alpha\beta} \left[ \left(\frac{\sigma_{\alpha\beta}}{r_{ij}}\right)^{12} - \left(\frac{\sigma_{\alpha\beta}}{r_{ij}}\right)^{6} \right]
+\end{equation}
+Here, the summation \(i<j\) ensures that each pair interaction is counted only once.
+The force between particles \(i\) and \(j\) is derived from \(U_{ij}\) by differentiation:
+\begin{equation}
+    \mathbf{F}_{ij} = -\frac{d U_{ij}}{d r_{ij}} \hat{\mathbf{r}}_{ij}
+\end{equation}
+where \( \hat{\mathbf{r}}_{ij} = \frac{\mathbf{r}_i - \mathbf{r}_j}{r_{ij}} \). Differentiating Equation \eqref{eq:KA} with respect to \(r_{ij}\) gives:
+\begin{equation}
+    \frac{d U_{ij}}{d r_{ij}} = 4\epsilon_{\alpha\beta} \left[-12 \left(\frac{\sigma_{\alpha\beta}}{r_{ij}}\right)^{12} \frac{1}{r_{ij}} + 6 \left(\frac{\sigma_{\alpha\beta}}{r_{ij}}\right)^{6} \frac{1}{r_{ij}}\right]
+\end{equation}
+Thus,
+\begin{equation}
+    F_{ij} = 24 \epsilon_{\alpha\beta} \left[\frac{2\sigma_{\alpha\beta}^{12}}{r_{ij}^{13}} - \frac{\sigma_{\alpha\beta}^{6}}{r_{ij}^{7}} \right]
+\end{equation}
+and the total force on particle \(i\) is:
+\begin{equation}
+    \mathbf{F}_i = \sum_{j \neq i} \mathbf{F}_{ij} = \sum_{j \neq i} 24 \epsilon_{\alpha\beta} \left[\frac{2\sigma_{\alpha\beta}^{12}}{r_{ij}^{13}} - \frac{\sigma_{\alpha\beta}^{6}}{r_{ij}^{7}} \right] \hat{\mathbf{r}}_{ij}
+\end{equation}
+
+\subsection{Periodic Boundary Conditions and the Minimum Image Convention}
+In a finite simulation, Periodic Boundary Conditions (PBCs) are used to mimic an infinite system. When a particle moves out of the simulation box, it re-enters from the opposite side, thereby eliminating surface effects.
+
+The Minimum Image Convention ensures that the interparticle distance \(r_{ij}\) is computed as the shortest distance between a particle and any periodic image of another particle. Mathematically, if the simulation box has length \(L\) in each dimension, then the distance between particles \(i\) and \(j\) is given by:
+\begin{equation}
+    r_{ij} = \min_{\mathbf{n}} |\mathbf{r}_j - \mathbf{r}_i - L\mathbf{n}|
+\end{equation}
+where \(\mathbf{n} = (n_x, n_y, n_z)\) with \( n_x, n_y, n_z \in \{-1,0,1\}\). This procedure ensures that interactions are computed using the closest image of each particle.
+
+A \textbf{cutoff radius} \(r_{\text{cut}}\) is applied to further reduce computational expense by considering interactions only if:
+\[
+\textbf{r}_{ij} < \textbf{r}_{\text{cut}}
+\]
+typically chosen as \(r_{\text{cut}} \approx 2.5\sigma\), where \(U_{ij}(\textbf{r}_{ij})=0\) 
+for \(\textbf{r}_{ij}\geq \textbf{r}_{\text{cut}}\) (i.e., the Lennard Jones Potential \(\alpha\beta\) becomes negligible) \cite{vollmayr2020introduction,kob1994scaling}. 
+To avoid a discontinuity in the potential energy, a \textbf{cutoff function} is introduced to smoothly truncate the potential at \(r_{\text{cut}}\).
+So, we can define 
+\begin{equation}
+    U_{ij}^{\text{cut}} = 
+    \begin{cases}
+        U_{\alpha\beta}(r_{ij}) - U_{\alpha\beta}(r_{\alpha\beta}^{\text{cut}}) & r_{ij} < r_{\alpha\beta}^\text{cut} \\
+        0 & \text{otherwise}
+    \end{cases}
+\end{equation}
+
+\subsection{Temperature Initialization}
+Initial velocities are sampled from the Maxwell--Boltzmann distribution to set 
+the system’s temperature. In practice, each velocity component is drawn from a 
+Gaussian distribution with zero mean and variance \(\sqrt{\frac{k_B T}{m_i}}\). 
+This approach ensures that the overall velocity distribution corresponds to the 
+desired temperature, allowing the simulation to proceed in an NVE ensemble using 
+the Velocity Verlet algorithm without an active thermostat.
+
+\section{Simulation: Integration \& Analysis}
+\subsection{Integration via the Velocity Verlet Algorithm}
+To update the positions and velocities, the Velocity Verlet algorithm is employed. The equations are:
+\begin{align}
+    \mathbf{r}_i(t+\Delta t) &= \mathbf{r}_i(t) + \mathbf{v}_i(t)\Delta t + \frac{1}{2} \mathbf{a}_i(t)\Delta t^2 \label{eq:verlet1} \\
+    \mathbf{v}_i(t+\Delta t) &= \mathbf{v}_i(t) + \frac{1}{2}\left[\mathbf{a}_i(t) + \mathbf{a}_i(t+\Delta t)\right]\Delta t \label{eq:verlet2}
+\end{align}\cite{allen1989computer}.
+Equation \eqref{eq:verlet1} updates the positions using the current velocities 
+and accelerations, while Equation \eqref{eq:verlet2} refines the velocities using
+the average of the current and new accelerations. This integration scheme is 
+both symplectic and time-reversible, making it ideal for energy conservation over
+long simulation times.
+
+\subsection{Specific Heat Capacity}
+The thermodynamic behavior of a system can be characterized by its specific heat capacity at constant volume, \(C_V\). This quantity 
+can be computed from fluctuations in the system’s total energy \cite{mcquarrie2000statistical}:
+\begin{equation}\label{eqhc}
+    C_V = \frac{1}{k_B T^2} \left( \langle E^2 \rangle - \langle E \rangle^2 \right)
+\end{equation}
+where \(E\) is the total energy of the system, \(k_B\) is the Boltzmann constant, and \(T\) is the absolute temperature. 
+The term \(\langle E^2 \rangle - \langle E \rangle^2\) represents the variance in energy, which increases as the system approaches a 
+phase transition.
+
+\subsection{Radial Distribution Function and Structure Factor}
+To gain insight into phase transitions, the radial distribution function (RDF), \(g(r)\), is used to describe the probability of 
+finding a particle at a distance \(r\) from a reference particle \cite{allen1989computer}. 
+It is a measure of the density of particles \(j\) at a distance \(r\) from a reference particle \(i\),
+where \(r=r_{ij} = |\bf{r}_i-\bf{r}_j|\) and radial symmetry is assumed \cite{vollmayr2020introduction}. 
+For a binary system, the RDF is defined as:
+\begin{equation}\label{eqrdf}
+    g_{\alpha\alpha}(r) = \frac{V}{N_{\alpha}(N_\alpha-1)} \langle\sum_{i=1}^{N_\alpha}\sum_{j=1, j\neq i}^{N_\alpha}\delta(r - |\bf{r}_i-\bf{r}_j|)\rangle
+\end{equation}
+where \(V\) is the system volume, \(N\) is the number of particles, and \(r_{ij}\) is the distance between particles \(i\) and \(j\) \cite{kob1995testing}. 
+In numerical simulations, \(g(r)\) is computed by binning interparticle distances and normalizing the counts. 
+The Dirac delta function \(\delta(r - |\bf{r}_i-\bf{r}_j|)\) ensures that only particles at a distance \(r\) contribute to the sum. 
+Therefore, the RDF provides information about the system’s structure, such as the presence of short-range order in solids or the absence of long-range order in liquids \cite{vollmayr2020introduction}.
+
+\bibliographystyle{unsrt}
+\bibliography{references}
+
+\end{document}
